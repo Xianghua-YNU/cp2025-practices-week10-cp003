@@ -12,7 +12,10 @@ def q3a(T):
     # 1. 将温度转换为以 10^8 K 为单位
     # 2. 注意处理温度为零的特殊情况
     # 3. 使用公式：q_{3α} = 5.09×10^11 ρ^2 Y^3 T_8^(-3) exp(-44.027/T_8)
-    pass
+    if T <= 0:
+        return 0
+    T8 = T / 1e8
+    return 5.09e11 * T8**(-3) * np.exp(-44.027 / T8)
 
 def plot_rate(filename="rate_vs_temp.png"):
     """绘制速率因子随温度变化的 log-log 图"""
@@ -22,7 +25,18 @@ def plot_rate(filename="rate_vs_temp.png"):
     # 2. 计算对应的速率值
     # 3. 使用 plt.loglog 绘制双对数图
     # 4. 添加适当的标签和标题
-    pass
+    T = np.logspace(7, 10, 100)
+    rates = [q3a(t) for t in T]
+    
+    plt.figure(figsize=(10, 6))
+    plt.loglog(T, rates, 'b-', linewidth=2)
+    plt.title("3-alpha Reaction Rate vs Temperature")
+    plt.xlabel("Temperature (K)")
+    plt.ylabel("Rate Factor (erg·cm$^6$/(g$^3$·s))")
+    plt.grid(True, which="both", linestyle='--')
+    
+    plt.savefig(filename, dpi=300)
+    print(f"图形已保存至：{filename}")
 
 if __name__ == "__main__":
     # 计算并打印 nu 值
@@ -38,5 +52,11 @@ if __name__ == "__main__":
     # 2. 使用前向差分计算导数
     # 3. 计算敏感性指数 nu
     # 4. 注意处理特殊情况（如 q = 0）
-
+    for T in temperatures_K:
+        q = q3a(T)
+        q_perturbed = q3a(T * (1 + h))
+        dq_dT = (q_perturbed - q) / (T * h)
+        nu = T * dq_dT / q
+        print(f"{T:12.1e} : ν = {nu:.3f}")
     # TODO: 调用绘图函数展示结果
+    plot_rate()
