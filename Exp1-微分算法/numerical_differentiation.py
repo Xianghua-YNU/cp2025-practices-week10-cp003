@@ -82,7 +82,7 @@ def create_comparison_plot(x, x_central, dy_central, dy_richardson, df_analytica
     ax2.legend()
     
     # 3. Richardson外推不同阶数误差对比图（对数坐标）
-    errors_richardson = [np.abs(dy - df_analytical(x)) for dy in dy_richardson]
+    errors_richardson = [np.abs(dy_richardson[:, i] - df_analytical(x)) for i in range(dy_richardson.shape[1])]
     for i, error in enumerate(errors_richardson):
         ax3.plot(x, error, label=f'Order {i}')
     ax3.set_yscale('log')
@@ -116,7 +116,7 @@ def main():
     dy_central = calculate_central_difference(x, f)
     
     # 计算Richardson外推导数
-    dy_richardson = [richardson_derivative_all_orders(x0, f, h) for x0 in x]
+    dy_richardson = np.array([richardson_derivative_all_orders(x0, f, h) for x0 in x])
 
     # 绘制结果对比图
     create_comparison_plot(x, x[1:-1], dy_central, dy_richardson, df_analytical)
